@@ -1,12 +1,14 @@
 package com.codepath.nytimessearch.activities;
 
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -16,6 +18,8 @@ import android.widget.RelativeLayout;
 
 import com.codepath.nytimessearch.R;
 import com.codepath.nytimessearch.adapters.ArticleAdapter;
+import com.codepath.nytimessearch.fragments.FilterDialogFragment;
+import com.codepath.nytimessearch.models.Filter;
 import com.codepath.nytimessearch.rest.RestClient;
 import com.codepath.nytimessearch.rest.models.Article;
 
@@ -29,9 +33,10 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class SearchActivity extends AppCompatActivity {
+public class SearchActivity extends AppCompatActivity implements FilterDialogFragment.FilterDialogListener {
     private final String BASE_URL = "https://api.nytimes.com/";
-    RestClient restClient = new RestClient();
+    private RestClient restClient = new RestClient();
+    private Filter filter = new Filter();
 
     @BindView(R.id.searchLayout)
     RelativeLayout searchLayout;
@@ -50,13 +55,16 @@ public class SearchActivity extends AppCompatActivity {
         setSupportActionBar(tbSearch);
     }
 
-    public void search(String query) {
-        restClient.getApiService().searchArticle(query).enqueue(new Callback<List<Article>>() {
+    public void search() {
+        restClient.getApiService().searchArticle(filter.getQuery(),
+                filter.getBeginDate(),
+                filter.getSortOrder(),
+                filter.getNewsType()).enqueue(new Callback<List<Article>>() {
             @Override
             public void onResponse(Call<List<Article>> call, Response<List<Article>> response) {
                 ArticleAdapter articleAdapter = new ArticleAdapter(response.body());
                 rvArticles.setAdapter(articleAdapter);
-                rvArticles.setLayoutManager(new GridLayoutManager(SearchActivity.this, 3));
+                rvArticles.setLayoutManager(new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL));
                 Snackbar.make(findViewById(R.id.searchLayout),
                         String.format("Loaded %d articles", response.body() != null ? response.body().size() : 0),
                         Snackbar.LENGTH_LONG).show();
@@ -85,7 +93,8 @@ public class SearchActivity extends AppCompatActivity {
                 // workaround to avoid issues with some emulators and keyboard devices firing twice if a keyboard enter is used
                 // see https://code.google.com/p/android/issues/detail?id=24599
                 searchView.clearFocus();
-                search(query);
+                filter.setQuery(query);
+                search();
                 return true;
             }
 
@@ -95,6 +104,28 @@ public class SearchActivity extends AppCompatActivity {
             }
         });
         return super.onCreateOptionsMenu(menu);
+    }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_setting:
+                showFilterDialog();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    public void showFilterDialog() {
+        FragmentManager manager = getSupportFragmentManager();
+        FilterDialogFragment filterDialogFragment = FilterDialogFragment.newInstance(filter);
+        filterDialogFragment.show(manager, "filter_dialog_fragment");
+    }
+
+    @Override
+    public void onSaveFilterDialog(Filter filter) {
+        this.filter = filter;
+        search();
     }
 }

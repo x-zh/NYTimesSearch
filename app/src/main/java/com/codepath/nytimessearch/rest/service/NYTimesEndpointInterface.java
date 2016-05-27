@@ -16,4 +16,10 @@ public interface NYTimesEndpointInterface {
 
     @GET("svc/search/v2/articlesearch.json?api-key=" + apiKey)
     Call<List<Article>> searchArticle(@Query("q") String keyword);
+
+    @GET("svc/search/v2/articlesearch.json?api-key=" + apiKey)
+    Call<List<Article>> searchArticle(@Query("q") String keyword,
+                                      @Query("begin_date") String beginDate,
+                                      @Query("sort") String sortType,
+                                      @Query("fq") String newsType);
 }

@@ -1,5 +1,7 @@
 package com.codepath.nytimessearch.rest.adapters;
 
+import android.util.Log;
+
 import com.codepath.nytimessearch.rest.models.Article;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -21,7 +23,13 @@ public class ArticleListDeserializer implements JsonDeserializer<List<Article>> 
             List<Article> arr = new ArrayList<Article>();
             JsonObject response = json.getAsJsonObject().get("response").getAsJsonObject();
             for(JsonElement e : response.get("docs").getAsJsonArray()) {
-                arr.add((Article) context.deserialize(e, Article.class));
+                try {
+                    arr.add((Article) context.deserialize(e, Article.class));
+                } catch (RuntimeException ex) {
+                    // ignore
+                    Log.d("Parsing", e.toString());
+                    Log.d("ParsingError", ex.toString());
+                }
             }
             return arr;
         } catch (RuntimeException e){
