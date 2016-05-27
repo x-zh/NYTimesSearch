@@ -75,4 +75,8 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ViewHold
     public int getItemCount() {
         return articles.size();
     }
+
+    public Article getItem(int position) {
+        return articles.get(position);
+    }
 }
