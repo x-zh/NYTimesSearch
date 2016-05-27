@@ -11,10 +11,11 @@ import java.util.Date;
  */
 @Parcel
 public class Filter {
-    private String query;
-    private Date beginDate;
-    private String sortOrder;
-    private String newsType;
+    String query;
+    Date beginDate;
+    String sortOrder;
+    String newsType;
+    int page;
 
     public Filter () {
         query = "";
@@ -23,12 +24,25 @@ public class Filter {
         newsType = "";
     }
 
+    public int getPage() {
+        return page;
+    }
+
+    public void setPage(int page) {
+        this.page = page;
+    }
+
+    public void resetPage() {
+        this.page = 0;
+    }
+
     public String getQuery() {
         return query;
     }
 
     public void setQuery(String query) {
         this.query = query;
+        resetPage();
     }
 
     public String getNewsType() {
@@ -37,6 +51,7 @@ public class Filter {
 
     public void setNewsType(String newsType) {
         this.newsType = newsType;
+        resetPage();
     }
 
     public Date getBeginDate() {
@@ -45,6 +60,7 @@ public class Filter {
 
     public void setBeginDate(Date beginDate) {
         this.beginDate = beginDate;
+        resetPage();
     }
 
     public String getBeginDateText() {
@@ -63,5 +79,6 @@ public class Filter {
 
     public void setSortOrder(String sortOrder) {
         this.sortOrder = sortOrder;
+        resetPage();
     }
 }

@@ -21,5 +21,6 @@ public interface NYTimesEndpointInterface {
     Call<List<Article>> searchArticle(@Query("q") String keyword,
                                       @Query("begin_date") String beginDate,
                                       @Query("sort") String sortType,
-                                      @Query("fq") String newsType);
+                                      @Query("fq") String newsType,
+                                      @Query("page") int page);
 }

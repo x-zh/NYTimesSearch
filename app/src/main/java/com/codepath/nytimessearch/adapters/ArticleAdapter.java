@@ -12,6 +12,7 @@ import com.codepath.nytimessearch.R;
 import com.codepath.nytimessearch.rest.models.Article;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -22,10 +23,13 @@ import butterknife.ButterKnife;
  */
 public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ViewHolder> {
 
-    private List<Article> articles;
+    private List<Article> articles = new ArrayList<Article>();
 
-    public ArticleAdapter(List<Article> articles) {
-        this.articles = articles;
+    public ArticleAdapter() {
+    }
+
+    public void addAll(List<Article> articles) {
+        this.articles.addAll(articles);
     }
 
 

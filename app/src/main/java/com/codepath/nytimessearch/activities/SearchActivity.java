@@ -22,11 +22,13 @@ import com.codepath.nytimessearch.R;
 import com.codepath.nytimessearch.adapters.ArticleAdapter;
 import com.codepath.nytimessearch.fragments.DatePickerFragment;
 import com.codepath.nytimessearch.fragments.FilterDialogFragment;
+import com.codepath.nytimessearch.listeners.EndlessRecyclerViewScrollListener;
 import com.codepath.nytimessearch.models.Filter;
 import com.codepath.nytimessearch.rest.RestClient;
 import com.codepath.nytimessearch.rest.models.Article;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -41,6 +43,7 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
     private RestClient restClient = new RestClient();
     private Filter filter = new Filter();
     private FilterDialogFragment filterDialogFragment = FilterDialogFragment.newInstance(filter);
+    private ArticleAdapter articleAdapter = new ArticleAdapter();
 
     @BindView(R.id.searchLayout)
     RelativeLayout searchLayout;
@@ -57,19 +60,31 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
         setContentView(R.layout.activity_search);
         ButterKnife.bind(this);
         setSupportActionBar(tbSearch);
+        StaggeredGridLayoutManager staggeredGridLayoutManager = new StaggeredGridLayoutManager(
+                3, StaggeredGridLayoutManager.VERTICAL);
+        rvArticles.setAdapter(articleAdapter);
+        rvArticles.setLayoutManager(staggeredGridLayoutManager);
+        rvArticles.addOnScrollListener(new EndlessRecyclerViewScrollListener(staggeredGridLayoutManager) {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount) {
+                filter.setPage(page);
+                search();
+            }
+        });
     }
 
     public void search() {
         restClient.getApiService().searchArticle(filter.getQuery(),
                 filter.getBeginDateText(),
                 filter.getSortOrder(),
-                filter.getNewsType()).enqueue(new Callback<List<Article>>() {
+                filter.getNewsType(),
+                filter.getPage()).enqueue(new Callback<List<Article>>() {
             @Override
             public void onResponse(Call<List<Article>> call, Response<List<Article>> response) {
                 if (response.body() != null) {
-                    ArticleAdapter articleAdapter = new ArticleAdapter(response.body());
-                    rvArticles.setAdapter(articleAdapter);
-                    rvArticles.setLayoutManager(new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL));
+                    articleAdapter.addAll(response.body());
+                    int curSize = articleAdapter.getItemCount();
+                    articleAdapter.notifyItemInserted(response.body().size());
                 } else {
                     Snackbar.make(findViewById(R.id.searchLayout),
                             String.format("Loaded 0 articles"),
