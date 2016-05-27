@@ -1,5 +1,6 @@
 package com.codepath.nytimessearch.activities;
 
+import android.app.DatePickerDialog;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.MenuItemCompat;
@@ -13,11 +14,13 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 
 import com.codepath.nytimessearch.R;
 import com.codepath.nytimessearch.adapters.ArticleAdapter;
+import com.codepath.nytimessearch.fragments.DatePickerFragment;
 import com.codepath.nytimessearch.fragments.FilterDialogFragment;
 import com.codepath.nytimessearch.models.Filter;
 import com.codepath.nytimessearch.rest.RestClient;
@@ -33,10 +36,11 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class SearchActivity extends AppCompatActivity implements FilterDialogFragment.FilterDialogListener {
+public class SearchActivity extends AppCompatActivity implements FilterDialogFragment.FilterDialogListener, DatePickerDialog.OnDateSetListener {
     private final String BASE_URL = "https://api.nytimes.com/";
     private RestClient restClient = new RestClient();
     private Filter filter = new Filter();
+    private FilterDialogFragment filterDialogFragment = FilterDialogFragment.newInstance(filter);
 
     @BindView(R.id.searchLayout)
     RelativeLayout searchLayout;
@@ -57,17 +61,20 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
 
     public void search() {
         restClient.getApiService().searchArticle(filter.getQuery(),
-                filter.getBeginDate(),
+                filter.getBeginDateText(),
                 filter.getSortOrder(),
                 filter.getNewsType()).enqueue(new Callback<List<Article>>() {
             @Override
             public void onResponse(Call<List<Article>> call, Response<List<Article>> response) {
-                ArticleAdapter articleAdapter = new ArticleAdapter(response.body());
-                rvArticles.setAdapter(articleAdapter);
-                rvArticles.setLayoutManager(new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL));
-                Snackbar.make(findViewById(R.id.searchLayout),
-                        String.format("Loaded %d articles", response.body() != null ? response.body().size() : 0),
-                        Snackbar.LENGTH_LONG).show();
+                if (response.body() != null) {
+                    ArticleAdapter articleAdapter = new ArticleAdapter(response.body());
+                    rvArticles.setAdapter(articleAdapter);
+                    rvArticles.setLayoutManager(new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL));
+                } else {
+                    Snackbar.make(findViewById(R.id.searchLayout),
+                            String.format("Loaded 0 articles"),
+                            Snackbar.LENGTH_LONG).show();
+                }
             }
 
             @Override
@@ -119,7 +126,6 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
 
     public void showFilterDialog() {
         FragmentManager manager = getSupportFragmentManager();
-        FilterDialogFragment filterDialogFragment = FilterDialogFragment.newInstance(filter);
         filterDialogFragment.show(manager, "filter_dialog_fragment");
     }
 
@@ -127,5 +133,10 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
     public void onSaveFilterDialog(Filter filter) {
         this.filter = filter;
         search();
+    }
+
+    @Override
+    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+        filterDialogFragment.updateBeginDate(year, monthOfYear, dayOfMonth);
     }
 }

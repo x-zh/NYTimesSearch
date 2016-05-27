@@ -20,6 +20,8 @@ import com.codepath.nytimessearch.models.Filter;
 import org.parceler.Parcels;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import butterknife.BindView;
@@ -60,19 +62,16 @@ public class FilterDialogFragment extends DialogFragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        filter = Parcels.unwrap(getArguments().getParcelable("filter"));
+
+        // populate spinner
         spSortOrderAdapter = ArrayAdapter.createFromResource(this.getContext(),
                 R.array.sort_order_array, android.R.layout.simple_spinner_item);
         spSortOrderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spSortOrder.setAdapter(spSortOrderAdapter);
-        etBeginDate.setText(filter.getBeginDate());
-        setNewsType(filter.getNewsType());
-        for(int i = 0; i < spSortOrderAdapter.getCount(); i++) {
-            if(spSortOrderAdapter.getItem(i).toString().equalsIgnoreCase(filter.getSortOrder())) {
-                spSortOrder.setSelection(i);
-            }
-        }
 
+        // load filter
+        filter = Parcels.unwrap(getArguments().getParcelable("filter"));
+        bind();
     }
 
     @Override
@@ -88,7 +87,6 @@ public class FilterDialogFragment extends DialogFragment {
     }
 
     public static FilterDialogFragment newInstance(Filter filter) {
-
         Bundle args = new Bundle();
         args.putParcelable("filter", Parcels.wrap(filter));
         FilterDialogFragment fragment = new FilterDialogFragment();
@@ -102,7 +100,6 @@ public class FilterDialogFragment extends DialogFragment {
 
     @OnClick(R.id.btnSave)
     public void save() {
-        filter.setBeginDate(etBeginDate.getText().toString());
         filter.setSortOrder(spSortOrderAdapter.getItem(
                 spSortOrder.getSelectedItemPosition()).toString());
         filter.setNewsType(getNewsType());
@@ -125,4 +122,33 @@ public class FilterDialogFragment extends DialogFragment {
         cbSports.setChecked(newsType.contains("Sports"));
     }
 
+    @OnClick(R.id.etBeginDate)
+    public void showDatePickerDialog(View v) {
+        DatePickerFragment newFragment = new DatePickerFragment();
+        Bundle args = new Bundle();
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(filter.getBeginDate());
+        args.putInt("year", cal.get(Calendar.YEAR));
+        args.putInt("month", cal.get(Calendar.MONTH));
+        args.putInt("day", cal.get(Calendar.DAY_OF_MONTH));
+        newFragment.setArguments(args);
+        newFragment.show(getActivity().getSupportFragmentManager(), "datePicker");
+    }
+
+    public void bind() {
+        etBeginDate.setText(filter.getBeginDateToShow());
+        setNewsType(filter.getNewsType());
+        for(int i = 0; i < spSortOrderAdapter.getCount(); i++) {
+            if(spSortOrderAdapter.getItem(i).toString().equalsIgnoreCase(filter.getSortOrder())) {
+                spSortOrder.setSelection(i);
+            }
+        }
+    }
+
+    public void updateBeginDate(int year, int monthOfYear, int dayOfMonth) {
+        Calendar cal = Calendar.getInstance();
+        cal.set(year, monthOfYear, dayOfMonth);
+        filter.setBeginDate(cal.getTime());
+        etBeginDate.setText(filter.getBeginDateToShow());
+    }
 }

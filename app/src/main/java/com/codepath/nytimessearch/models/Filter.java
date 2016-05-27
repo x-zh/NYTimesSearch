@@ -2,18 +2,23 @@ package com.codepath.nytimessearch.models;
 
 import org.parceler.Parcel;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 /**
  * Created by charlie_zhou on 5/27/16.
  */
 @Parcel
 public class Filter {
     private String query;
-    private String beginDate;
+    private Date beginDate;
     private String sortOrder;
     private String newsType;
 
     public Filter () {
-        beginDate = "";
+        query = "";
+        beginDate = new Date();
         sortOrder = "newest";
         newsType = "";
     }
@@ -34,12 +39,22 @@ public class Filter {
         this.newsType = newsType;
     }
 
-    public String getBeginDate() {
+    public Date getBeginDate() {
         return beginDate;
     }
 
-    public void setBeginDate(String beginDate) {
+    public void setBeginDate(Date beginDate) {
         this.beginDate = beginDate;
+    }
+
+    public String getBeginDateText() {
+        DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+        return dateFormat.format(beginDate);
+    }
+
+    public String getBeginDateToShow() {
+        DateFormat dateFormat = new SimpleDateFormat("M/d/yyyy");
+        return dateFormat.format(beginDate);
     }
 
     public String getSortOrder() {
