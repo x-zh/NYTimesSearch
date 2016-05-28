@@ -1,16 +1,23 @@
 package com.codepath.nytimessearch.fragments;
 
+import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentManager;
 import android.text.TextUtils;
+import android.view.Display;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
 
@@ -31,7 +38,7 @@ import butterknife.OnClick;
 /**
  * Created by charlie_zhou on 5/26/16.
  */
-public class FilterDialogFragment extends DialogFragment {
+public class FilterDialogFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener {
     private Filter filter = new Filter();
 
     @BindView(R.id.etBeginDate)
@@ -78,10 +85,17 @@ public class FilterDialogFragment extends DialogFragment {
     public void onResume() {
         // Get existing layout params for the window
         ViewGroup.LayoutParams params = getDialog().getWindow().getAttributes();
-        // Assign window properties to fill the parent
-        params.width = WindowManager.LayoutParams.MATCH_PARENT;
-        params.height = WindowManager.LayoutParams.MATCH_PARENT;
-        getDialog().getWindow().setAttributes((android.view.WindowManager.LayoutParams) params);
+
+
+        Window window = getDialog().getWindow();
+        Point size = new Point();
+        // Store dimensions of the screen in `size`
+        Display display = window.getWindowManager().getDefaultDisplay();
+        display.getSize(size);
+        // Set the width of the dialog proportional to 75% of the screen width
+        window.setLayout((int) (size.x * 0.75), WindowManager.LayoutParams.WRAP_CONTENT);
+        window.setGravity(Gravity.CENTER);
+
         // Call super onResume after sizing
         super.onResume();
     }
@@ -111,7 +125,7 @@ public class FilterDialogFragment extends DialogFragment {
     public String getNewsType() {
         List<String> newsTypes = new ArrayList<String>();
         if (cbArts.isChecked()) newsTypes.add("news_desk:Arts");
-        if (cbFashion.isChecked()) newsTypes.add("news_desk:Fashion");
+        if (cbFashion.isChecked()) newsTypes.add("news_desk:Fashion & Style");
         if (cbSports.isChecked()) newsTypes.add("news_desk:Sports");
         return TextUtils.join(" OR ", newsTypes);
     }
@@ -124,6 +138,7 @@ public class FilterDialogFragment extends DialogFragment {
 
     @OnClick(R.id.etBeginDate)
     public void showDatePickerDialog(View v) {
+        FragmentManager fm = getFragmentManager();
         DatePickerFragment newFragment = new DatePickerFragment();
         Bundle args = new Bundle();
         Calendar cal = Calendar.getInstance();
@@ -132,7 +147,8 @@ public class FilterDialogFragment extends DialogFragment {
         args.putInt("month", cal.get(Calendar.MONTH));
         args.putInt("day", cal.get(Calendar.DAY_OF_MONTH));
         newFragment.setArguments(args);
-        newFragment.show(getActivity().getSupportFragmentManager(), "datePicker");
+        newFragment.setTargetFragment(FilterDialogFragment.this, 300);
+        newFragment.show(fm, "datePicker");
     }
 
     public void bind() {
@@ -145,7 +161,8 @@ public class FilterDialogFragment extends DialogFragment {
         }
     }
 
-    public void updateBeginDate(int year, int monthOfYear, int dayOfMonth) {
+    @Override
+    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
         Calendar cal = Calendar.getInstance();
         cal.set(year, monthOfYear, dayOfMonth);
         filter.setBeginDate(cal.getTime());

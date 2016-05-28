@@ -4,6 +4,7 @@ import org.parceler.Parcel;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -19,7 +20,9 @@ public class Filter {
 
     public Filter () {
         query = "";
-        beginDate = new Date();
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.YEAR, cal.get(Calendar.YEAR) - 1);
+        beginDate = cal.getTime();
         sortOrder = "newest";
         newsType = "";
     }

@@ -1,7 +1,9 @@
 package com.codepath.nytimessearch.rest;
 
 import com.codepath.nytimessearch.rest.adapters.ArticleListDeserializer;
+import com.codepath.nytimessearch.rest.adapters.MultimediumListDeserializer;
 import com.codepath.nytimessearch.rest.models.Article;
+import com.codepath.nytimessearch.rest.models.Multimedium;
 import com.codepath.nytimessearch.rest.service.NYTimesEndpointInterface;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
@@ -25,6 +27,7 @@ public class RestClient {
         Gson gson = new GsonBuilder()
                 .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
                 .registerTypeAdapter(new TypeToken<List<Article>>() {}.getType(), new ArticleListDeserializer())
+                .registerTypeAdapter(new TypeToken<List<Multimedium>>() {}.getType(), new MultimediumListDeserializer())
                 .setDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'SSS'Z'")
                 .create();
 

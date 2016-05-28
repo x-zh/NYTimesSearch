@@ -1,7 +1,10 @@
 package com.codepath.nytimessearch.activities;
 
 import android.app.DatePickerDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.MenuItemCompat;
@@ -36,7 +39,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class SearchActivity extends AppCompatActivity implements FilterDialogFragment.FilterDialogListener, DatePickerDialog.OnDateSetListener {
+public class SearchActivity extends AppCompatActivity implements FilterDialogFragment.FilterDialogListener {
     private final String BASE_URL = "https://api.nytimes.com/";
     private RestClient restClient = new RestClient();
     private Filter filter = new Filter();
@@ -66,21 +69,32 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
             @Override
             public void onLoadMore(int page, int totalItemsCount) {
                 filter.setPage(page);
-                search();
+                search(false);
             }
         });
         ItemClickSupport.addTo(rvArticles).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
             @Override
             public void onItemClicked(RecyclerView recyclerView, int position, View v) {
                 Intent intent = new Intent(SearchActivity.this, ArticleActivity.class);
-                intent.putExtra("url", articleAdapter.getItem(position).getWebUrl());
+                Article article = articleAdapter.getItem(position);
+                intent.putExtra("url", article.getWebUrl());
+                intent.putExtra("title", article.getHeadline().getMain());
                 startActivity(intent);
             }
         });
-        search();
+//        if (!isNetworkAvailable()) {
+//            Snackbar.make(findViewById(R.id.searchLayout),
+//                    String.format("Network is not available."),
+//                    Snackbar.LENGTH_LONG).show();
+//        }
+        search(true);
     }
 
-    public void search() {
+    public void search(boolean clear) {
+        if (clear) {
+            articleAdapter.clear();
+            articleAdapter.notifyDataSetChanged();
+        }
         restClient.getApiService().searchArticle(filter.getQuery(),
                 filter.getBeginDateText(),
                 filter.getSortOrder(),
@@ -101,9 +115,16 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
 
             @Override
             public void onFailure(Call<List<Article>> call, Throwable t) {
+                t.printStackTrace();
                 Snackbar.make(findViewById(R.id.searchLayout),
                         String.format("Loading failed: %s", t.getMessage()),
-                        Snackbar.LENGTH_LONG).show();
+                        Snackbar.LENGTH_LONG)
+                        .setAction("Retry", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                search(false);
+                            }
+                        }).show();
             }
         });
     }
@@ -123,7 +144,7 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
                 // see https://code.google.com/p/android/issues/detail?id=24599
                 searchView.clearFocus();
                 filter.setQuery(query);
-                search();
+                search(true);
                 return true;
             }
 
@@ -154,11 +175,13 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
     @Override
     public void onSaveFilterDialog(Filter filter) {
         this.filter = filter;
-        search();
+        search(true);
     }
 
-    @Override
-    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-        filterDialogFragment.updateBeginDate(year, monthOfYear, dayOfMonth);
-    }
+//    private Boolean isNetworkAvailable() {
+//        ConnectivityManager connectivityManager
+//                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+//        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+//        return activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting();
+//    }
 }
