@@ -19,6 +19,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.DatePicker;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
 import com.codepath.nytimessearch.R;
@@ -55,6 +56,8 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
     @BindView(R.id.tbSearch)
     Toolbar tbSearch;
 
+    MenuItem miActionProgressItem;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,7 +65,7 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
         ButterKnife.bind(this);
         setSupportActionBar(tbSearch);
         StaggeredGridLayoutManager staggeredGridLayoutManager = new StaggeredGridLayoutManager(
-                3, StaggeredGridLayoutManager.VERTICAL);
+                4, StaggeredGridLayoutManager.VERTICAL);
         rvArticles.setAdapter(articleAdapter);
         rvArticles.setLayoutManager(staggeredGridLayoutManager);
         rvArticles.addOnScrollListener(new EndlessRecyclerViewScrollListener(staggeredGridLayoutManager) {
@@ -91,6 +94,7 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
     }
 
     public void search(boolean clear) {
+        if (miActionProgressItem != null) miActionProgressItem.setVisible(true);
         if (clear) {
             articleAdapter.clear();
             articleAdapter.notifyDataSetChanged();
@@ -111,11 +115,11 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
                             String.format("Loaded 0 articles"),
                             Snackbar.LENGTH_LONG).show();
                 }
+                miActionProgressItem.setVisible(false);
             }
 
             @Override
             public void onFailure(Call<List<Article>> call, Throwable t) {
-                t.printStackTrace();
                 Snackbar.make(findViewById(R.id.searchLayout),
                         String.format("Loading failed: %s", t.getMessage()),
                         Snackbar.LENGTH_LONG)
@@ -125,6 +129,8 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
                                 search(false);
                             }
                         }).show();
+
+                miActionProgressItem.setVisible(false);
             }
         });
     }
@@ -154,6 +160,13 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
             }
         });
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        miActionProgressItem = menu.findItem(R.id.miActionProgress);
+        ProgressBar v =  (ProgressBar) MenuItemCompat.getActionView(miActionProgressItem);
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
