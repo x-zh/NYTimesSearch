@@ -13,7 +13,8 @@
     <!-- Define your custom dialog theme here extending from base -->
     <style name="AppDialogTheme" parent="Theme.AppCompat.Light.Dialog">
         <!-- Define window properties as desired -->
-        <item name="android:windowBackground">@color/white</item>
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:windowBackground">@color/colorPrimary</item>
         <item name="android:windowCloseOnTouchOutside">true</item>
     </style>
 
@@ -24,7 +25,12 @@
     <style name="BlackFont.Big">
         <item name="android:textSize">@dimen/big_font_size</item>
     </style>
-
-
+    <style name="WhiteFont">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">@dimen/mid_font_size</item>
+    </style>
+    <style name="WhiteFont.Big">
+        <item name="android:textSize">@dimen/big_font_size</item>
+    </style>
 
 </resources>

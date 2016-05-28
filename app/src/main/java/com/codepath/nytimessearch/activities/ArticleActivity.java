@@ -26,11 +26,11 @@ import butterknife.ButterKnife;
  * Created by charlie_zhou on 5/27/16.
  */
 public class ArticleActivity extends AppCompatActivity {
+
+    MenuItem miActionProgressItem;
+
     @BindView(R.id.wvArticle)
     WebView wvArticle;
-
-    @BindView(R.id.pbLoading)
-    ProgressBar pbLoading;
 
     @BindView(R.id.tbShare)
     Toolbar tbShare;
@@ -49,7 +49,7 @@ public class ArticleActivity extends AppCompatActivity {
         wvArticle.getSettings().setJavaScriptEnabled(true);
         wvArticle.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
         // Configure the client to use when opening URLs
-        wvArticle.setWebViewClient(new MyBrowser(pbLoading));
+        wvArticle.setWebViewClient(new MyBrowser(miActionProgressItem));
         // Load the initial URL
         wvArticle.loadUrl(getIntent().getStringExtra("url"));
     }
@@ -73,11 +73,18 @@ public class ArticleActivity extends AppCompatActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
-    private class MyBrowser extends WebViewClient {
-        private ProgressBar pbLoading;
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        miActionProgressItem = menu.findItem(R.id.miActionProgress);
+        ProgressBar v =  (ProgressBar) MenuItemCompat.getActionView(miActionProgressItem);
+        return super.onPrepareOptionsMenu(menu);
+    }
 
-        public MyBrowser (ProgressBar pbLoading) {
-            this.pbLoading = pbLoading;
+    private class MyBrowser extends WebViewClient {
+        private MenuItem miActionProgressItem;
+
+        public MyBrowser (MenuItem miActionProgressItem) {
+            this.miActionProgressItem = miActionProgressItem;
         }
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -87,12 +94,12 @@ public class ArticleActivity extends AppCompatActivity {
 
         @Override
         public void onPageStarted(WebView view, String url, Bitmap favicon) {
-            pbLoading.setVisibility(ProgressBar.VISIBLE);
+            if (miActionProgressItem != null) miActionProgressItem.setVisible(true);
         }
 
         @Override
         public void onPageFinished(WebView view, String url) {
-            pbLoading.setVisibility(ProgressBar.INVISIBLE);
+            if (miActionProgressItem != null) miActionProgressItem.setVisible(false);
         }
     }
 }

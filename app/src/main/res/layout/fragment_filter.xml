@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:theme="@style/AppDialogTheme"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingLeft="@dimen/activity_horizontal_margin"
@@ -14,6 +16,7 @@
 
         <TextView
             android:id="@+id/tvBeginDate"
+            style="@style/WhiteFont"
             android:gravity="right"
             android:paddingRight="2dp"
             android:layout_width="0dp"
@@ -36,6 +39,7 @@
 
         <TextView
             android:id="@+id/tvSortOrder"
+            style="@style/WhiteFont"
             android:layout_width="0dp"
             android:gravity="right"
             android:paddingRight="2dp"
@@ -47,9 +51,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:id="@+id/spSortOrder"
-            android:layout_weight="0.7" >
 
-            </Spinner>
+            android:layout_weight="0.7" />
 
     </LinearLayout>
 
@@ -59,6 +62,7 @@
 
         <TextView
             android:id="@+id/tvNewsType"
+            style="@style/WhiteFont"
             android:layout_width="0dp"
             android:gravity="right"
             android:paddingRight="2dp"
@@ -74,27 +78,34 @@
 
             <CheckBox
                 android:id="@+id/cbArts"
+                style="@style/WhiteFont"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/arts"/>
+                android:text="@string/arts"
+                android:buttonTint="@color/white" />
 
             <CheckBox
                 android:id="@+id/cbFashion"
+                style="@style/WhiteFont"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/fashion_amp_style"/>
+                android:text="@string/fashion_amp_style"
+                android:buttonTint="@color/white" />
 
             <CheckBox
                 android:id="@+id/cbSports"
+                style="@style/WhiteFont"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/sports"/>
+                android:text="@string/sports"
+                android:buttonTint="@color/white" />
 
         </LinearLayout>
     </LinearLayout>
 
     <Button
         android:id="@+id/btnSave"
+        android:background="@color/colorAccent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
